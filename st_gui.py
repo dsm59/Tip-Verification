@@ -55,7 +55,7 @@ if st.button("Find Irregularities", type="primary"):
                 st.write("Tare weight is at least 400 kg above the total dataset average for the truck.")
                 # We check isinstance to gracefully handle if the backend returns pd.dataframe (the class itself) instead of a DataFrame instance
                 if isinstance(excess_tare_weight, pd.DataFrame) and not excess_tare_weight.empty:
-                    st.dataframe(excess_tare_weight, use_container_width=True)
+                    st.dataframe(excess_tare_weight, width='stretch')
                 else:
                     st.success("No tare weight irregularities detected.")
                 
@@ -65,7 +65,7 @@ if st.button("Find Irregularities", type="primary"):
                 st.subheader("Excess Load Weight")
                 st.write("Load weight is at least 1000 kg above the monthly average for the specific day and run.")
                 if isinstance(excess_load_weight, pd.DataFrame) and not excess_load_weight.empty:
-                    st.dataframe(excess_load_weight, use_container_width=True)
+                    st.dataframe(excess_load_weight, width='stretch')
                 else:
                     st.success("No load weight irregularities detected.")
                     
