@@ -51,7 +51,7 @@ def find_tare_weight_irregularities(opsportal_df, num_days_ago):
     
     if len(excess_tare_weight_list) > 0:
         excess_tare_weight_df = pd.concat(excess_tare_weight_list)
-        return excess_tare_weight_df
+        return excess_tare_weight_df.drop(columns=['Product','Avg Bin Weight','Total Bins','Card Bins','index'])
     else:
         return pd.dataframe
         
@@ -86,6 +86,6 @@ def find_load_weight_irregularities(opsportal_df, num_days_ago):
     
     if len (excess_load_list) > 0:
         excess_load_weight_df = pd.concat(excess_load_list)
-        return excess_load_weight_df
+        return excess_load_weight_df.drop(columns=['Product','Avg Bin Weight','Total Bins','Card Bins','index'])
     else:
         return pd.dataframe
