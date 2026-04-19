@@ -53,7 +53,7 @@ def find_tare_weight_irregularities(opsportal_df, num_days_ago):
         excess_tare_weight_df = pd.concat(excess_tare_weight_list)
         return excess_tare_weight_df.drop(columns=['Product','Avg Bin Weight','Total Bins','Card Bins','index']).set_index('ID')
     else:
-        return pd.dataframe
+        return pd.DataFrame
         
 
 def find_load_weight_irregularities(opsportal_df, num_days_ago):
@@ -69,10 +69,29 @@ def find_load_weight_irregularities(opsportal_df, num_days_ago):
         for day in week:
             selected_run_day   = opsportal_df[(opsportal_df['Run'] == runs[i]) & (opsportal_df['Day'] == day)]
             selected_run_day   = selected_run_day[selected_run_day['Weight'] != 0]
-            selected_run_day   = selected_run_day[selected_run_day['Timestamp'] > pd.Timestamp.now().normalize() - pd.Timedelta(days=30)]
-            median_load_weight = selected_run_day['Weight'].median(skipna=True)
+            # Find 30 days rolling median
+            selected_run_day = selected_run_day.groupby(selected_run_day['Timestamp'].dt.normalize()).agg({
+                'ID': lambda x: ', '.join(x.astype(str).unique()), # Combines IDs into "ID1, ID2",
+                'Tip': lambda x: ', '.join(x.astype(str).unique()),
+                'Product': lambda x: ', '.join(x.astype(str).unique()),
+                'Gross Weight': 'sum',
+                'Avg Bin Weight': 'first',
+                'Tare Weight': 'sum',
+                'Weight': 'sum',
+                'Total Bins': 'sum',
+                'Card Bins': 'sum',
+                'Docket': lambda x: ', '.join(x.astype(str).unique()),
+                'Run': lambda x: ', '.join(x.astype(str).unique()),
+                'Driver': lambda x: ', '.join(x.astype(str).unique()),
+                'Truck': lambda x: ', '.join(x.astype(str).unique()),
+                'Day': lambda x: ', '.join(x.astype(str).unique()),
+            }).reset_index()
             
-            # Find load weights where more than 500 kg above average
+            # Find 30 days rolling median (Weight is now the daily sum)
+            median_window = selected_run_day[selected_run_day['Timestamp'] > (pd.Timestamp.now().normalize() - pd.Timedelta(days=30))]
+            median_load_weight = median_window['Weight'].median(skipna=True)
+            
+            # Find load weights where more than 1000 kg above average
             excess_load_weight = selected_run_day[(selected_run_day['Weight'] >= (median_load_weight+1000)) & (selected_run_day['Timestamp'] > pd.Timestamp.now().normalize() - pd.Timedelta(days=num_days_ago))].copy().reset_index()
             
             if not excess_load_weight.empty:
@@ -88,4 +107,4 @@ def find_load_weight_irregularities(opsportal_df, num_days_ago):
         excess_load_weight_df = pd.concat(excess_load_list)
         return excess_load_weight_df.drop(columns=['Product','Avg Bin Weight','Total Bins','Card Bins','index']).set_index('ID')
     else:
-        return pd.dataframe
+        return pd.DataFrame
