@@ -69,22 +69,24 @@ def find_load_weight_irregularities(opsportal_df, num_days_ago):
         for day in week:
             selected_run_day   = opsportal_df[(opsportal_df['Run'] == runs[i]) & (opsportal_df['Day'] == day)]
             selected_run_day   = selected_run_day[selected_run_day['Weight'] != 0]
-            # Find 30 days rolling median
+            # Sum by same day
+            safe_join = lambda x: ', '.join(x.dropna().astype(str).unique())
+            
             selected_run_day = selected_run_day.groupby(selected_run_day['Timestamp'].dt.normalize()).agg({
-                'ID': lambda x: ', '.join(x.astype(str).unique()), # Combines IDs into "ID1, ID2",
-                'Tip': lambda x: ', '.join(x.astype(str).unique()),
-                'Product': lambda x: ', '.join(x.astype(str).unique()),
+                'ID': safe_join,
+                'Tip': safe_join,
+                'Product': safe_join, # This will now result in an empty string "" instead of "nan"
                 'Gross Weight': 'sum',
-                'Avg Bin Weight': 'first',
+                'Avg Bin Weight': 'mean', # Changed from 'first' - usually safer for averages
                 'Tare Weight': 'sum',
                 'Weight': 'sum',
                 'Total Bins': 'sum',
                 'Card Bins': 'sum',
-                'Docket': lambda x: ', '.join(x.astype(str).unique()),
-                'Run': lambda x: ', '.join(x.astype(str).unique()),
-                'Driver': lambda x: ', '.join(x.astype(str).unique()),
-                'Truck': lambda x: ', '.join(x.astype(str).unique()),
-                'Day': lambda x: ', '.join(x.astype(str).unique()),
+                'Docket': safe_join,
+                'Run': safe_join,
+                'Driver': safe_join,
+                'Truck': safe_join,
+                'Day': safe_join,
             }).reset_index()
             
             # Find 30 days rolling median (Weight is now the daily sum)
