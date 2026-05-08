@@ -94,7 +94,7 @@ def find_load_weight_irregularities(opsportal_df, num_days_ago):
             median_load_weight = median_window['Weight'].median(skipna=True)
             
             # Find load weights where more than 1000 kg above average
-            excess_load_weight = selected_run_day[(selected_run_day['Weight'] >= (median_load_weight+1000)) & (selected_run_day['Timestamp'] > pd.Timestamp.now().normalize() - pd.Timedelta(days=num_days_ago))].copy().reset_index()
+            excess_load_weight = selected_run_day[(selected_run_day['Weight'] >= (median_load_weight+800)) & (selected_run_day['Timestamp'] > pd.Timestamp.now().normalize() - pd.Timedelta(days=num_days_ago))].copy().reset_index()
             
             if not excess_load_weight.empty:
                 for j in range(len(excess_load_weight)):
